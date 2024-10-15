@@ -30,12 +30,14 @@ function updateButtons(options) {
 
       // Add click event to set the cursor and access the entire record.
       button.addEventListener('click', function () {
-        // Remove 'selected' class from any other button.
+        // Remove 'selected' state from any other button.
         const previous = document.querySelector('.selected');
-        if (previous) previous.classList.remove('selected', 'bg-blue-500', 'text-gray-200');
+        if (previous) {
+          previous.classList.remove('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
+        }
 
-        // Add 'selected' class to the clicked button.
-        button.classList.add('selected', 'bg-blue-500', 'text-gray-200');
+        // Add 'selected' state to the clicked button.
+        button.classList.add('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
 
         // Get the selected record (entire row).
         const selectedRecord = allRecords[index];
@@ -94,9 +96,9 @@ function initGrist() {
 
     buttons.forEach((btn, btnIndex) => {
       if (btnIndex === index) {
-        btn.classList.add('selected', 'bg-blue-500', 'text-gray-200');
+        btn.classList.add('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
       } else {
-        btn.classList.remove('selected', 'bg-blue-500', 'text-gray-200');
+        btn.classList.remove('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
       }
     });
 
