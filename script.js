@@ -25,7 +25,7 @@ function updateButtons(options) {
       button.className = 'item-container';
       button.textContent = String(option);
 
-      // Add click event to set the cursor position in Grist.
+      // Add click event to set the cursor position in Grist and display row data.
       button.addEventListener('click', function () {
         // Remove 'selected' class from any other button.
         const previous = document.querySelector('.item-container.selected');
@@ -38,12 +38,21 @@ function updateButtons(options) {
         const selectedRecord = allRecords[index];
         if (selectedRecord) {
           grist.setCursorPos({ rowId: selectedRecord.id });
+
+          // Display the entire row's data in the readout section.
+          displayRowData(selectedRecord);
         }
       });
 
       container.appendChild(button);
     });
   }
+}
+
+// Function to display the entire row's data.
+function displayRowData(record) {
+  const readout = document.getElementById('readout');
+  readout.innerHTML = `<pre>${JSON.stringify(record, null, 2)}</pre>`;
 }
 
 // Initialize the widget.
@@ -84,6 +93,11 @@ function initGrist() {
         btn.classList.remove('selected');
       }
     });
+
+    // Display the row's data if the record is available.
+    if (record) {
+      displayRowData(record);
+    }
   });
 }
 
