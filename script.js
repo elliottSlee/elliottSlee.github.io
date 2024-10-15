@@ -47,7 +47,7 @@ function updateButtons(options) {
 
           if (cursorValue !== undefined) {
             console.log(`Setting cursor to value: ${cursorValue}`);
-            grist.setCursorPos({ rowId: cursorValue });
+            grist.setCursorPos({ rowId: cursorValue }); // Update cursor position.
           }
 
           console.log("Selected Record:", selectedRecord); // Log the record for further use.
