@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Responsive Widget with Tailwind</title>
+  <title>Button Set Component for Grist 2.1</title>
 
   <!-- Tailwind CSS from CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-
 </head>
 <body class="bg-gray-50 p-4 sm:p-8">
+  <div id="plan-version-display" class="text-lg font-semibold mb-4 hidden">
+    <!-- Plan Version ID will be displayed here -->
+  </div>
   <div id="column-container" class="space-y-2 sm:space-y-4">
     <!-- Buttons will be dynamically inserted here -->
   </div>
