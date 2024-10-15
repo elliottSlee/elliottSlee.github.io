@@ -1,74 +1,91 @@
+let allRecords = [];
+
+// Helper to show/hide error messages.
 function showError(msg) {
-    let el = document.getElementById('error');
-    if (!msg) {
-      el.style.display = 'none';
-    } else {
-      el.innerHTML = msg;
-      el.style.display = 'block';
-    }
+  const errorEl = document.getElementById('error');
+  if (!msg) {
+    errorEl.style.display = 'none';
+  } else {
+    errorEl.textContent = msg;
+    errorEl.style.display = 'block';
   }
-  
-  function updateDropdown(options) {
-    const dropdown = document.getElementById('dropdown');
-    dropdown.innerHTML = '';
-    if (options.length === 0) {
-      const optionElement = document.createElement('option');
-      optionElement.textContent = 'No options available';
-      dropdown.appendChild(optionElement);
-    } else {
-      options.forEach((option, index) => {
-        const optionElement = document.createElement('option');
-        optionElement.value = String(index);
-        optionElement.textContent = String(option);
-        dropdown.appendChild(optionElement);
+}
+
+// Function to create buttons for each option.
+function updateButtons(options) {
+  const container = document.getElementById('column-container');
+  container.innerHTML = ''; // Clear previous content.
+
+  if (options.length === 0) {
+    showError("No options available");
+  } else {
+    showError(""); // Clear error if valid options are found.
+    options.forEach((option, index) => {
+      const button = document.createElement('div');
+      button.className = 'item-container';
+      button.textContent = String(option);
+
+      // Add click event to set the cursor position in Grist.
+      button.addEventListener('click', function () {
+        // Remove 'selected' class from any other button.
+        const previous = document.querySelector('.item-container.selected');
+        if (previous) previous.classList.remove('selected');
+
+        // Add 'selected' class to the clicked button.
+        button.classList.add('selected');
+
+        // Set the cursor to the corresponding row in Grist.
+        const selectedRecord = allRecords[index];
+        if (selectedRecord) {
+          grist.setCursorPos({ rowId: selectedRecord.id });
+        }
       });
+
+      container.appendChild(button);
+    });
+  }
+}
+
+// Initialize the widget.
+function initGrist() {
+  grist.ready({
+    columns: [{ name: "OptionsToSelect", title: "Select a column", type: "Any" }],
+    requiredAccess: 'read table',
+    allowSelectBy: true,
+  });
+
+  // Listen for records and update buttons accordingly.
+  grist.onRecords(function (records) {
+    if (!records || records.length === 0) {
+      showError("No records received");
+      updateButtons([]);
+      return;
     }
-  }
-  
-  function initGrist() {
-    grist.ready({
-      columns: [{ name: "OptionsToSelect", title: 'Options to select', type: 'Any' }],
-      requiredAccess: 'read table',
-      allowSelectBy: true,
-    });
-  
-    let allRecords = [];
-  
-    grist.onRecords(function (records) {
-      if (!records || records.length === 0) {
-        showError("No records received");
-        updateDropdown([]);
-        return;
-      }
-      
-      allRecords = records;
-      const mapped = grist.mapColumnNames(records);
-  
-      showError("");
-      const options = mapped.map(record => record.OptionsToSelect).filter(option => option !== null && option !== undefined);
-      
-      if (options.length === 0) {
-        showError("No valid options found");
-      }
-      updateDropdown(options);
-    });
-  
-    grist.onRecord(function (record) {
-      const mapped = grist.mapColumnNames(record);
-      const dropdown = document.getElementById('dropdown');
-      const index = allRecords.findIndex(r => r.id === record.id);
-      if (index !== -1) {
-        dropdown.value = String(index);
+
+    allRecords = records;
+    const mapped = grist.mapColumnNames(records);
+
+    const options = mapped
+      .map(record => record.OptionsToSelect)
+      .filter(option => option !== null && option !== undefined);
+
+    updateButtons(options);
+  });
+
+  // Sync button selection with the Grist cursor position.
+  grist.onRecord(function (record) {
+    const index = allRecords.findIndex(r => r.id === record.id);
+    const buttons = document.querySelectorAll('.item-container');
+
+    buttons.forEach((btn, btnIndex) => {
+      if (btnIndex === index) {
+        btn.classList.add('selected');
+      } else {
+        btn.classList.remove('selected');
       }
     });
-  
-    document.getElementById('dropdown').addEventListener('change', function(event) {
-      const selectedIndex = parseInt(event.target.value);
-      const selectedRecord = allRecords[selectedIndex];
-      if (selectedRecord) {
-        grist.setCursorPos({rowId: selectedRecord.id});
-      }
-    });
-  }
-  
-  document.addEventListener('DOMContentLoaded', initGrist);
+  });
+}
+
+// Initialize the widget on page load.
+document.addEventListener('DOMContentLoaded', initGrist);

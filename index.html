@@ -2,55 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Drop-down Widget</title>
+  <title>Button Widget</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      background-color: var(--grist-theme-page-bg);
-      color: var(--grist-theme-text);
+    body {
+      font-family: sans-serif;
+      padding: 1em;
     }
-    #container {
-      position: relative;
-      height: 100%;
+
+    .item-container {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
     }
-    #dropdown {
-      width: 100%;
-      box-sizing: border-box;
-      margin: 0;
-      padding: 2px;
-      height: 100%;
-      background-color: var(--grist-theme-page-panels-main-panel-bg);
-      border: 1px solid var(--grist-theme-table-body-border);
-      color: var(--grist-theme-text);
+
+    .item-container:hover {
+      background-color: #f0f0f0;
     }
+
+    .item-container.selected {
+      background-color: #e0e0e0;
+      border: 2px solid #007bff;
+    }
+
     #error {
       display: none;
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 50%;
-      height: 100%;
-      background: rgba(208, 2, 27, 0.8);
-      color: white;
-      padding: 2px;
-      font-size: 12px;
-      overflow-y: auto;
-      box-sizing: border-box;
-    }
-    #dropdown:focus {
-      outline: 2px solid var(--grist-theme-cursor);
+      color: red;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <select id="dropdown"></select>
-    <div id="error"></div>
+  <div id="column-container" style="margin-top: 10px;">
+    <!-- Containers for column rows will be dynamically inserted here -->
   </div>
+  <div id="error"></div>
   <script src="script.js"></script>
 </body>
 </html>
