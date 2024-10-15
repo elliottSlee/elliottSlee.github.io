@@ -11,7 +11,7 @@ function showError(msg) {
   }
 }
 
-// Function to create Tailwind-styled buttons for each row in the selected column.
+// Function to create responsive buttons for each row in the selected column.
 function updateButtons(options) {
   const container = document.getElementById('column-container');
   container.innerHTML = ''; // Clear previous content.
@@ -22,7 +22,10 @@ function updateButtons(options) {
     showError(""); // Clear error if valid options are found.
     options.forEach((option, index) => {
       const button = document.createElement('button');
-      button.className = 'w-full bg-white border rounded-lg px-4 py-2 text-left hover:bg-gray-100';
+      button.className = 
+        'w-full bg-white border rounded-lg px-2 py-1 sm:px-4 sm:py-2 ' +
+        'text-left hover:bg-gray-100 text-sm sm:text-base transition-all duration-150';
+
       button.textContent = String(option);
 
       // Add click event to set the cursor and access the entire record.

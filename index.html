@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Widget with Tailwind Buttons</title>
+  <title>Responsive Widget with Tailwind</title>
 
   <!-- Tailwind CSS from CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -10,11 +10,11 @@
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
 </head>
-<body class="bg-gray-50 p-8">
-  <div id="column-container" class="space-y-4">
+<body class="bg-gray-50 p-4 sm:p-8">
+  <div id="column-container" class="space-y-2 sm:space-y-4">
     <!-- Buttons will be dynamically inserted here -->
   </div>
-  <div id="error" class="text-red-500 hidden"></div>
+  <div id="error" class="text-red-500 hidden mt-4"></div>
 
   <script src="script.js"></script>
 </body>
