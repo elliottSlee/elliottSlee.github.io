@@ -4,14 +4,14 @@ let allRecords = []; // Stores all records from the selected column
 function showError(msg) {
   const errorEl = document.getElementById('error');
   if (!msg) {
-    errorEl.style.display = 'none';
+    errorEl.classList.add('hidden');
   } else {
     errorEl.textContent = msg;
-    errorEl.style.display = 'block';
+    errorEl.classList.remove('hidden');
   }
 }
 
-// Function to create buttons for each row in the selected column.
+// Function to create Tailwind-styled buttons for each row in the selected column.
 function updateButtons(options) {
   const container = document.getElementById('column-container');
   container.innerHTML = ''; // Clear previous content.
@@ -21,18 +21,18 @@ function updateButtons(options) {
   } else {
     showError(""); // Clear error if valid options are found.
     options.forEach((option, index) => {
-      const button = document.createElement('div');
-      button.className = 'item-container';
+      const button = document.createElement('button');
+      button.className = 'w-full bg-white border rounded-lg px-4 py-2 text-left hover:bg-gray-100';
       button.textContent = String(option);
 
       // Add click event to set the cursor and access the entire record.
       button.addEventListener('click', function () {
         // Remove 'selected' class from any other button.
-        const previous = document.querySelector('.item-container.selected');
+        const previous = document.querySelector('.selected');
         if (previous) previous.classList.remove('selected');
 
         // Add 'selected' class to the clicked button.
-        button.classList.add('selected');
+        button.classList.add('selected', 'bg-blue-500', 'text-white');
 
         // Get the selected record (entire row).
         const selectedRecord = allRecords[index];
@@ -42,9 +42,8 @@ function updateButtons(options) {
 
           // Use the entire record object as needed.
           console.log("Selected Record:", selectedRecord); // Log the whole record for further use.
-          
-          // You can now access any field from the selected record dynamically.
-          // Example usage: Pass the entire record to other widgets.
+
+          // Example usage: Link this record with another widget.
           handleRecordSelection(selectedRecord);
         }
       });
@@ -54,11 +53,10 @@ function updateButtons(options) {
   }
 }
 
-// Function to handle the selected record (can be used for widget linking).
+// Function to handle the selected record (for linking with other widgets).
 function handleRecordSelection(record) {
   // This function will be called when a record is selected.
-  // You can use the record object to interact with other widgets or perform actions.
-  console.log("Handling Record:", record); // For example, logging the record.
+  console.log("Handling Record:", record); // Log the record for testing.
 }
 
 // Initialize the widget.
@@ -90,13 +88,13 @@ function initGrist() {
   // Sync button selection with the Grist cursor position.
   grist.onRecord(function (record) {
     const index = allRecords.findIndex(r => r.id === record.id);
-    const buttons = document.querySelectorAll('.item-container');
+    const buttons = document.querySelectorAll('button');
 
     buttons.forEach((btn, btnIndex) => {
       if (btnIndex === index) {
-        btn.classList.add('selected');
+        btn.classList.add('selected', 'bg-blue-500', 'text-white');
       } else {
-        btn.classList.remove('selected');
+        btn.classList.remove('selected', 'bg-blue-500', 'text-white');
       }
     });
 

@@ -2,43 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Button Widget</title>
+  <title>Widget with Tailwind Buttons</title>
+
+  <!-- Tailwind CSS from CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 1em;
-    }
 
-    .item-container {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      cursor: pointer;
-      border-radius: 6px;
-      transition: background-color 0.3s ease;
-    }
-
-    .item-container:hover {
-      background-color: #f0f0f0;
-    }
-
-    .item-container.selected {
-      background-color: #e0e0e0;
-      border: 2px solid #007bff;
-    }
-
-    #error {
-      display: none;
-      color: red;
-      margin-top: 10px;
-    }
-  </style>
 </head>
-<body>
-  <div id="column-container" style="margin-top: 10px;">
-    <!-- Containers for column rows will be dynamically inserted here -->
+<body class="bg-gray-50 p-8">
+  <div id="column-container" class="space-y-4">
+    <!-- Buttons will be dynamically inserted here -->
   </div>
-  <div id="error"></div>
+  <div id="error" class="text-red-500 hidden"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
