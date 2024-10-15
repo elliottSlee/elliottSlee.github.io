@@ -11,14 +11,6 @@ function showError(msg) {
   }
 }
 
-// Function to display the Plan Version ID or any other mapped field at the top.
-function displayMappedField(mappedRecord) {
-  const displayEl = document.getElementById('plan-version-display');
-  const planVersionID = mappedRecord?.Plan_Version_ID || 'N/A'; // Default to 'N/A' if the field is missing.
-  displayEl.textContent = `Plan Version ID: ${planVersionID}`;
-  displayEl.classList.remove('hidden');
-}
-
 // Function to create responsive buttons for each row in the selected column.
 function updateButtons(options) {
   const container = document.getElementById('column-container');
@@ -30,7 +22,7 @@ function updateButtons(options) {
     showError(""); // Clear error if valid options are found.
     options.forEach((option, index) => {
       const button = document.createElement('button');
-      button.className = 
+      button.className =
         'w-full bg-white border rounded-lg px-2 py-1 sm:px-4 sm:py-2 ' +
         'text-left hover:bg-gray-100 text-sm sm:text-base transition-all duration-150';
 
@@ -38,20 +30,23 @@ function updateButtons(options) {
 
       // Add click event to set the cursor and access the entire record.
       button.addEventListener('click', function () {
+        // Remove 'selected' state from any other button.
         const previous = document.querySelector('.selected');
         if (previous) {
           previous.classList.remove('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
         }
 
+        // Add 'selected' state to the clicked button.
         button.classList.add('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
 
+        // Get the selected record (entire row).
         const selectedRecord = allRecords[index];
         if (selectedRecord) {
+          // Set the cursor to the corresponding row in Grist.
           grist.setCursorPos({ rowId: selectedRecord.id });
 
-          // Map column names dynamically and display the result.
-          const mappedRecord = grist.mapColumnNames(selectedRecord);
-          displayMappedField(mappedRecord);
+          // Log the selected record for debugging or further use.
+          console.log("Selected Record:", selectedRecord);
         }
       });
 
@@ -60,7 +55,7 @@ function updateButtons(options) {
   }
 }
 
-// Function to initialize the widget and handle records dynamically.
+// Initialize the widget and handle records dynamically.
 function initGrist() {
   grist.ready({
     columns: [{ name: "OptionsToSelect", title: "Select a column", type: "Any" }],
@@ -68,6 +63,7 @@ function initGrist() {
     allowSelectBy: true,
   });
 
+  // Listen for changes in the selected records and update buttons.
   grist.onRecords(function (records) {
     if (!records || records.length === 0) {
       showError("No records received");
@@ -85,9 +81,23 @@ function initGrist() {
     updateButtons(options);
   });
 
-  grist.onRecord(function (record, mappings) {
-    const mappedRecord = grist.mapColumnNames(record);
-    displayMappedField(mappedRecord);
+  // Sync button selection with the Grist cursor position.
+  grist.onRecord(function (record) {
+    const index = allRecords.findIndex(r => r.id === record.id);
+    const buttons = document.querySelectorAll('button');
+
+    buttons.forEach((btn, btnIndex) => {
+      if (btnIndex === index) {
+        btn.classList.add('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
+      } else {
+        btn.classList.remove('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
+      }
+    });
+
+    // Optional: Log the record if further interaction is needed.
+    if (record) {
+      console.log("Current Record:", record);
+    }
   });
 }
 
