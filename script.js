@@ -11,15 +11,12 @@ function showError(msg) {
   }
 }
 
-// Function to display the Plan Version ID at the top.
-function displayPlanVersionID(id) {
+// Function to display the Plan Version ID or any other mapped field at the top.
+function displayMappedField(mappedRecord) {
   const displayEl = document.getElementById('plan-version-display');
-  if (id) {
-    displayEl.textContent = `Plan Version ID: ${id}`;
-    displayEl.classList.remove('hidden');
-  } else {
-    displayEl.classList.add('hidden'); // Hide if no ID is available.
-  }
+  const planVersionID = mappedRecord?.Plan_Version_ID || 'N/A'; // Default to 'N/A' if the field is missing.
+  displayEl.textContent = `Plan Version ID: ${planVersionID}`;
+  displayEl.classList.remove('hidden');
 }
 
 // Function to create responsive buttons for each row in the selected column.
@@ -41,27 +38,20 @@ function updateButtons(options) {
 
       // Add click event to set the cursor and access the entire record.
       button.addEventListener('click', function () {
-        // Remove 'selected' state from any other button.
         const previous = document.querySelector('.selected');
         if (previous) {
           previous.classList.remove('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
         }
 
-        // Add 'selected' state to the clicked button.
         button.classList.add('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
 
-        // Get the selected record (entire row).
         const selectedRecord = allRecords[index];
         if (selectedRecord) {
-          // Set the cursor to the corresponding row in Grist.
           grist.setCursorPos({ rowId: selectedRecord.id });
 
-          // Display the Plan Version ID (if available).
-          const planVersionID = selectedRecord.Plan_Version_ID;
-          displayPlanVersionID(planVersionID);
-
-          // Log the selected record.
-          console.log("Selected Record:", selectedRecord);
+          // Map column names dynamically and display the result.
+          const mappedRecord = grist.mapColumnNames(selectedRecord);
+          displayMappedField(mappedRecord);
         }
       });
 
@@ -70,12 +60,7 @@ function updateButtons(options) {
   }
 }
 
-// Function to handle the selected record (for linking with other widgets).
-function handleRecordSelection(record) {
-  console.log("Handling Record:", record); // Log the record for testing.
-}
-
-// Initialize the widget.
+// Function to initialize the widget and handle records dynamically.
 function initGrist() {
   grist.ready({
     columns: [{ name: "OptionsToSelect", title: "Select a column", type: "Any" }],
@@ -83,7 +68,6 @@ function initGrist() {
     allowSelectBy: true,
   });
 
-  // Listen for records and update buttons accordingly.
   grist.onRecords(function (records) {
     if (!records || records.length === 0) {
       showError("No records received");
@@ -101,22 +85,9 @@ function initGrist() {
     updateButtons(options);
   });
 
-  // Sync button selection with the Grist cursor position.
-  grist.onRecord(function (record) {
-    const index = allRecords.findIndex(r => r.id === record.id);
-    const buttons = document.querySelectorAll('button');
-
-    buttons.forEach((btn, btnIndex) => {
-      if (btnIndex === index) {
-        btn.classList.add('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
-      } else {
-        btn.classList.remove('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
-      }
-    });
-
-    // Display the Plan Version ID if available.
-    const planVersionID = record ? record.Plan_Version_ID : null;
-    displayPlanVersionID(planVersionID);
+  grist.onRecord(function (record, mappings) {
+    const mappedRecord = grist.mapColumnNames(record);
+    displayMappedField(mappedRecord);
   });
 }
 
