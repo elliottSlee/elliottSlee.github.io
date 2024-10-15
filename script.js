@@ -1,4 +1,5 @@
 let allRecords = []; // Stores all records from the selected column
+let linkColumnName = null; // Stores the name of the optional LinkColumn (if selected)
 
 // Helper to show/hide error messages.
 function showError(msg) {
@@ -39,7 +40,15 @@ function updateButtons(options) {
 
         const selectedRecord = allRecords[index];
         if (selectedRecord) {
-          grist.setCursorPos({ rowId: selectedRecord.id });
+          // Use LinkColumn if available; otherwise, fall back to OptionsToSelect.
+          const cursorValue = linkColumnName 
+            ? selectedRecord[linkColumnName] 
+            : selectedRecord.OptionsToSelect;
+
+          if (cursorValue !== undefined) {
+            console.log(`Setting cursor to value: ${cursorValue}`);
+            grist.setCursorPos({ rowId: cursorValue });
+          }
 
           console.log("Selected Record:", selectedRecord); // Log the record for further use.
         }
@@ -68,6 +77,12 @@ function initGrist() {
     ],
     requiredAccess: 'read table',
     allowSelectBy: true,
+  });
+
+  // Store the optional LinkColumn if it's selected.
+  grist.onOptions(function (options) {
+    linkColumnName = options?.LinkColumn || null;
+    console.log(`LinkColumn selected: ${linkColumnName}`);
   });
 
   // Listen for changes in the selected records and update buttons.
