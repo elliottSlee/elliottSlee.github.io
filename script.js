@@ -30,23 +30,18 @@ function updateButtons(options) {
 
       // Add click event to set the cursor and access the entire record.
       button.addEventListener('click', function () {
-        // Remove 'selected' state from any other button.
         const previous = document.querySelector('.selected');
         if (previous) {
           previous.classList.remove('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
         }
 
-        // Add 'selected' state to the clicked button.
         button.classList.add('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
 
-        // Get the selected record (entire row).
         const selectedRecord = allRecords[index];
         if (selectedRecord) {
-          // Set the cursor to the corresponding row in Grist.
           grist.setCursorPos({ rowId: selectedRecord.id });
 
-          // Log the selected record for debugging or further use.
-          console.log("Selected Record:", selectedRecord);
+          console.log("Selected Record:", selectedRecord); // Log the record for further use.
         }
       });
 
@@ -55,10 +50,22 @@ function updateButtons(options) {
   }
 }
 
-// Initialize the widget and handle records dynamically.
+// Initialize the widget and allow optional column selection for linking.
 function initGrist() {
   grist.ready({
-    columns: [{ name: "OptionsToSelect", title: "Select a column", type: "Any" }],
+    columns: [
+      { 
+        name: "OptionsToSelect", 
+        title: "Select a column", 
+        type: "Any" 
+      },
+      { 
+        name: "LinkColumn", 
+        title: "Select a Column to Link Widgets", 
+        type: "Any", 
+        optional: true // This column is optional.
+      }
+    ],
     requiredAccess: 'read table',
     allowSelectBy: true,
   });
@@ -94,9 +101,8 @@ function initGrist() {
       }
     });
 
-    // Optional: Log the record if further interaction is needed.
     if (record) {
-      console.log("Current Record:", record);
+      console.log("Current Record:", record); // Log the record if needed.
     }
   });
 }
