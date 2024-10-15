@@ -1,4 +1,4 @@
-let allRecords = [];
+let allRecords = []; // Stores all records from the selected column
 
 // Helper to show/hide error messages.
 function showError(msg) {
@@ -11,7 +11,7 @@ function showError(msg) {
   }
 }
 
-// Function to create buttons for each option.
+// Function to create buttons for each row in the selected column.
 function updateButtons(options) {
   const container = document.getElementById('column-container');
   container.innerHTML = ''; // Clear previous content.
@@ -25,7 +25,7 @@ function updateButtons(options) {
       button.className = 'item-container';
       button.textContent = String(option);
 
-      // Add click event to set the cursor position in Grist.
+      // Add click event to set the cursor and access the entire record.
       button.addEventListener('click', function () {
         // Remove 'selected' class from any other button.
         const previous = document.querySelector('.item-container.selected');
@@ -34,16 +34,31 @@ function updateButtons(options) {
         // Add 'selected' class to the clicked button.
         button.classList.add('selected');
 
-        // Set the cursor to the corresponding row in Grist.
+        // Get the selected record (entire row).
         const selectedRecord = allRecords[index];
         if (selectedRecord) {
+          // Set the cursor to the corresponding row in Grist.
           grist.setCursorPos({ rowId: selectedRecord.id });
+
+          // Use the entire record object as needed.
+          console.log("Selected Record:", selectedRecord); // Log the whole record for further use.
+          
+          // You can now access any field from the selected record dynamically.
+          // Example usage: Pass the entire record to other widgets.
+          handleRecordSelection(selectedRecord);
         }
       });
 
       container.appendChild(button);
     });
   }
+}
+
+// Function to handle the selected record (can be used for widget linking).
+function handleRecordSelection(record) {
+  // This function will be called when a record is selected.
+  // You can use the record object to interact with other widgets or perform actions.
+  console.log("Handling Record:", record); // For example, logging the record.
 }
 
 // Initialize the widget.
@@ -62,7 +77,7 @@ function initGrist() {
       return;
     }
 
-    allRecords = records;
+    allRecords = records; // Store all records for later use.
     const mapped = grist.mapColumnNames(records);
 
     const options = mapped
@@ -84,6 +99,11 @@ function initGrist() {
         btn.classList.remove('selected');
       }
     });
+
+    // Optional: Use the entire record object as needed.
+    if (record) {
+      handleRecordSelection(record);
+    }
   });
 }
 
