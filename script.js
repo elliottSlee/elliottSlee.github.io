@@ -11,6 +11,17 @@ function showError(msg) {
   }
 }
 
+// Function to display the Plan Version ID at the top.
+function displayPlanVersionID(id) {
+  const displayEl = document.getElementById('plan-version-display');
+  if (id) {
+    displayEl.textContent = `Plan Version ID: ${id}`;
+    displayEl.classList.remove('hidden');
+  } else {
+    displayEl.classList.add('hidden'); // Hide if no ID is available.
+  }
+}
+
 // Function to create responsive buttons for each row in the selected column.
 function updateButtons(options) {
   const container = document.getElementById('column-container');
@@ -44,6 +55,10 @@ function updateButtons(options) {
         if (selectedRecord) {
           // Set the cursor to the corresponding row in Grist.
           grist.setCursorPos({ rowId: selectedRecord.id });
+
+          // Display the Plan Version ID (if available).
+          const planVersionID = selectedRecord["Plan Version ID"];
+          displayPlanVersionID(planVersionID);
 
           // Use the entire record object as needed.
           console.log("Selected Record:", selectedRecord); // Log the whole record for further use.
@@ -101,6 +116,10 @@ function initGrist() {
         btn.classList.remove('selected', 'bg-blue-500', 'text-gray-200', 'border-blue-500', 'border-4');
       }
     });
+
+    // Display the Plan Version ID if available.
+    const planVersionID = record ? record["Plan Version ID"] : null;
+    displayPlanVersionID(planVersionID);
 
     // Optional: Use the entire record object as needed.
     if (record) {
