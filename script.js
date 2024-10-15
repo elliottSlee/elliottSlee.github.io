@@ -57,14 +57,11 @@ function updateButtons(options) {
           grist.setCursorPos({ rowId: selectedRecord.id });
 
           // Display the Plan Version ID (if available).
-          const planVersionID = selectedRecord["Plan Version ID"];
+          const planVersionID = selectedRecord.Plan_Version_ID;
           displayPlanVersionID(planVersionID);
 
-          // Use the entire record object as needed.
-          console.log("Selected Record:", selectedRecord); // Log the whole record for further use.
-
-          // Example usage: Link this record with another widget.
-          handleRecordSelection(selectedRecord);
+          // Log the selected record.
+          console.log("Selected Record:", selectedRecord);
         }
       });
 
@@ -118,13 +115,8 @@ function initGrist() {
     });
 
     // Display the Plan Version ID if available.
-    const planVersionID = record ? record["Plan Version ID"] : null;
+    const planVersionID = record ? record.Plan_Version_ID : null;
     displayPlanVersionID(planVersionID);
-
-    // Optional: Use the entire record object as needed.
-    if (record) {
-      handleRecordSelection(record);
-    }
   });
 }
 
