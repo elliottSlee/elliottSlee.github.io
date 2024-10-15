@@ -32,10 +32,10 @@ function updateButtons(options) {
       button.addEventListener('click', function () {
         // Remove 'selected' class from any other button.
         const previous = document.querySelector('.selected');
-        if (previous) previous.classList.remove('selected');
+        if (previous) previous.classList.remove('selected', 'bg-blue-500', 'text-gray-200');
 
         // Add 'selected' class to the clicked button.
-        button.classList.add('selected', 'bg-blue-500', 'text-white');
+        button.classList.add('selected', 'bg-blue-500', 'text-gray-200');
 
         // Get the selected record (entire row).
         const selectedRecord = allRecords[index];
@@ -58,7 +58,6 @@ function updateButtons(options) {
 
 // Function to handle the selected record (for linking with other widgets).
 function handleRecordSelection(record) {
-  // This function will be called when a record is selected.
   console.log("Handling Record:", record); // Log the record for testing.
 }
 
@@ -95,9 +94,9 @@ function initGrist() {
 
     buttons.forEach((btn, btnIndex) => {
       if (btnIndex === index) {
-        btn.classList.add('selected', 'bg-blue-500', 'text-white');
+        btn.classList.add('selected', 'bg-blue-500', 'text-gray-200');
       } else {
-        btn.classList.remove('selected', 'bg-blue-500', 'text-white');
+        btn.classList.remove('selected', 'bg-blue-500', 'text-gray-200');
       }
     });
 
