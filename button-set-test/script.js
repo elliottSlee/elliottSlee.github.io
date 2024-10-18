@@ -1,31 +1,29 @@
 let allRecords = []; // Stores all records from the selected table
 
-// Initialize the Grist widget with the necessary columns
+// Initialize the Grist widget with column selection
 function initGrist() {
   grist.ready({
-    columns: [
-      { name: "OptionsToSelect", title: 'Options to select', type: 'Any' },
-      { name: "LinkColumn", title: 'Column to Link Widgets', type: 'Any', optional: true }
-    ],
+    columns: [{ name: "OptionsToSelect", title: 'Options to select', type: 'Any' }],
     requiredAccess: 'read table',
     allowSelectBy: true,
   });
 
-  // Fetch and display records when the table changes
+  // Fetch and map all records, then display them
   grist.onRecords(function (records) {
     if (!records || records.length === 0) {
       console.error("No records received");
       return;
     }
 
-    // Store the records and map their columns
+    // Store and map the records
     allRecords = records;
     const mapped = grist.mapColumnNames(records);
 
-    // Display the records in the UI
+    // Display each record in its own div
     displayRecords(mapped);
   });
 
+  // Update the displayed record details when a record is selected
   // Handle the record change and fetch the full row from the table
   grist.onRecord(async function (record) {
     if (!record) return; // If no record is selected, do nothing
@@ -39,7 +37,7 @@ function initGrist() {
   });
 }
 
-// Display all fetched records as clickable divs
+// Display each record in its own div inside the records container
 function displayRecords(mappedRecords) {
   const container = document.getElementById('records-container');
   container.innerHTML = ''; // Clear previous content
@@ -48,19 +46,13 @@ function displayRecords(mappedRecords) {
     const recordDiv = document.createElement('div');
     recordDiv.textContent = `Record ${index + 1}: ${JSON.stringify(record)}`;
 
-    // Add click event to set the cursor and trigger onRecord()
+    // Add click event to select the record in Grist
     recordDiv.addEventListener('click', function () {
       grist.setCursorPos({ rowId: record.id });
     });
 
     container.appendChild(recordDiv);
   });
-}
-
-// Display the full record details in the right column
-function displayRecordDetails(fullRecord) {
-  const readout = document.getElementById('readout');
-  readout.innerHTML = JSON.stringify(fullRecord, null, 2); // Pretty-print JSON data
 }
 
 // Initialize the widget on page load
