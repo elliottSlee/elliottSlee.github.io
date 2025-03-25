@@ -1,10 +1,10 @@
 .flex-container {
     display: flex;
     flex-wrap: nowrap;
-    
 }
 
 .flex-items {
+    padding: 40px;
     width: 50%;
     float: left;
 }
