@@ -1,5 +1,10 @@
 .flex-container {
     display: flex;
     flex-wrap: nowrap;
+    
 }
 
+.flex-items {
+    width: 50%;
+    float: left;
+}
