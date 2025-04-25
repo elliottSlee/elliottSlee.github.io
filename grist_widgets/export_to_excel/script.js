@@ -47,7 +47,7 @@ function renderTable() {
 // Export current view to CSV
 function exportCSV() {
   if (!exportCols.length) {
-    return showError("Select columns first.");
+    return showError("Select or map columns first.");
   }
   const rows = [
     exportCols,
@@ -68,7 +68,7 @@ function exportCSV() {
 // Export current view to Excel
 function exportXLSX() {
   if (!exportCols.length) {
-    return showError("Select columns first.");
+    return showError("Select or map columns first.");
   }
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(allRecords, { header: exportCols });
@@ -91,15 +91,26 @@ function initGrist() {
     allowSelectBy: true,
   });
 
-  // When user saves column mapping, update exportCols & re-render
+  // When user saves a column mapping, update exportCols & re-render
   grist.onOptions((options) => {
-    exportCols = options?.ExportCols || [];
+    const mapped = options?.ExportCols || [];
+    if (mapped.length) {
+      exportCols = mapped;
+    }
     renderTable();
   });
 
-  // When the view’s records change, update allRecords & re-render
+  // When the view’s records change, update allRecords & set default columns if needed
   grist.onRecords((records) => {
     allRecords = records || [];
+    // Map column names
+    const mappedRecords = grist.mapColumnNames(allRecords) || [];
+    // If no explicit mapping yet, default exportCols to all keys
+    if (!exportCols.length && mappedRecords.length) {
+      exportCols = Object.keys(mappedRecords[0]);
+    }
+    // Use mappedRecords to render
+    allRecords = mappedRecords;
     renderTable();
   });
 
