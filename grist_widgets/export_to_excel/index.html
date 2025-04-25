@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Grist Export Widget</title>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script> :contentReference[oaicite:1]{index=1}
+
+  <style>
+    body {
+      font-family: "Roboto", sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: var(--grist-theme-page-bg, #fafafa);
+      color: var(--grist-theme-text, #333);
+    }
+    .controls {
+      margin-bottom: 16px;
+    }
+    button {
+      margin-right: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: left;
+    }
+    th {
+      background: #f5f5f5;
+      font-weight: 500;
+      color: #616161;
+    }
+    tr:hover {
+      background: #eeeeee;
+    }
+    #error {
+      color: red;
+      margin-top: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button id="export-csv">Export CSV</button>
+    <button id="export-xlsx">Export Excel</button>
+  </div>
+  <div class="container">
+    <table id="data-table">
+      <thead><tr id="table-header"></tr></thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+  <div id="error"></div>
+  <script src="script.js"></script>
+</body>
+</html>
