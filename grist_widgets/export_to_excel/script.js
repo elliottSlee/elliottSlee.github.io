@@ -94,7 +94,8 @@ function initGrist() {
   // When user saves column mapping, update exportCols & re-render
   grist.onOptions((options) => {
     if (options?.ExportCols?.length) {
-      exportCols = options.ExportCols;
+      // Filter out the internal id column if user accidentally included it
+      exportCols = options.ExportCols.filter(c => c !== 'id');
       renderTable();
     }
   });
@@ -111,7 +112,8 @@ function initGrist() {
     });
     // If no explicit mapping yet, default exportCols to all keys of the first record
     if (!exportCols.length && allRecords.length) {
-      exportCols = Object.keys(allRecords[0]);
+      exportCols = Object.keys(allRecords[0])
+      filter(c => c !== 'id');  // exclude the id column by default
     }
     renderTable();
   });
