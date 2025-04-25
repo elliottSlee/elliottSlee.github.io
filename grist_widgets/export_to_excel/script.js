@@ -1,16 +1,4 @@
-let allRecords = [];
-let exportCols = [];
-
-// Show or hide an error message
-function showError(msg) {
-  const el = document.getElementById('error');
-  if (msg) {
-    el.textContent = msg;
-    el.style.display = 'block';
-  } else {
-    el.style.display = 'none';
-  }
-}
+// …rest of your script.js…
 
 // Render the table using only the columns in exportCols
 function renderTable() {
@@ -44,30 +32,6 @@ function renderTable() {
   });
 }
 
-// Export visible data to CSV
-function exportCSV() {
-  if (!exportCols.length) return showError("Select columns first.");
-  const rows = [exportCols, ...allRecords.map(r => exportCols.map(c => r[c]))];
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'export.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// Export visible data to Excel
-function exportXLSX() {
-  if (!exportCols.length) return showError("Select columns first.");
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(allRecords, {header: exportCols});
-  XLSX.utils.book_append_sheet(wb, ws, 'Export');
-  XLSX.writeFile(wb, 'export.xlsx');
-}
-
-// Initialize Grist widget
 function initGrist() {
   grist.ready({
     columns: [
@@ -75,7 +39,6 @@ function initGrist() {
         name: "ExportCols",
         title: "Columns to Export",
         type: "Any",
-        optional: false,
         allowMultiple: true,
       }
     ],
@@ -83,24 +46,22 @@ function initGrist() {
     allowSelectBy: true,
   });
 
-  // Store which columns the user picked
-  grist.onOptions((options, interaction) => {
+  // 1) When the user saves their column mapping, update exportCols & re-render
+  grist.onOptions((options) => {
     exportCols = options?.ExportCols || [];
-  });
-
-  // Get current view records
-  grist.onRecords((records) => {
-    if (!records) {
-      showError("No records in view.");
-      return;
-    }
-    allRecords = records;
     renderTable();
   });
 
-  // Wire up buttons
-  document.getElementById('export-csv').addEventListener('click', exportCSV);
-  document.getElementById('export-xlsx').addEventListener('click', exportXLSX);
+  // 2) When the view’s records change, update allRecords & re-render
+  grist.onRecords((records) => {
+    allRecords = records || [];
+    renderTable();
+  });
+
+  document.getElementById('export-csv')
+    .addEventListener('click', exportCSV);
+  document.getElementById('export-xlsx')
+    .addEventListener('click', exportXLSX);
 }
 
 document.addEventListener('DOMContentLoaded', initGrist);
