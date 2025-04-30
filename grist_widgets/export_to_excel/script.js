@@ -47,9 +47,6 @@ function renderTable() {
 
 // Build a filename by concatenating the FIRST record’s values in titleCols
 function makeFilename(ext) {
-  if (!titleCols.length || !allRecords.length) {
-    return `export.${ext}`;
-  }
   const first = allRecords[0];
   const parts = titleCols.map(col => first[col] ?? '').filter(v => v !== '');
   const base = parts.join(' ');
