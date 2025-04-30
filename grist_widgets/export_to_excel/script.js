@@ -44,6 +44,21 @@ function renderTable() {
   });
 }
 
+// Build a filename from the FIRST record in view, concatenating selected columns
+function makeFilename(ext) {
+  if (!exportCols.length || !allRecords.length) {
+    return `export.${ext}`;
+  }
+  const first = allRecords[0];
+  const parts = exportCols.map(col => {
+    const v = first[col];
+    return v != null ? String(v) : '';
+  }).filter(s => s);  // drop empty strings
+  const base = parts.join(' ');
+  // sanitize any filesystem-unsafe chars if you like
+  return `${base}.${ext}`;
+}
+
 // Export current view to CSV
 function exportCSV() {
   if (!exportCols.length) {
@@ -60,7 +75,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'export.csv';
+  a.download = makeFilename('csv');
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -73,7 +88,7 @@ function exportXLSX() {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(allRecords, { header: exportCols });
   XLSX.utils.book_append_sheet(wb, ws, 'Export');
-  XLSX.writeFile(wb, 'export.xlsx');
+  XLSX.writeFile(wb, makeFilename('xlsx'));
 }
 
 // Initialize the widget
@@ -113,7 +128,7 @@ function initGrist() {
     // If no explicit mapping yet, default exportCols to all keys of the first record
     if (!exportCols.length && allRecords.length) {
       exportCols = Object.keys(allRecords[0])
-      filter(c => c !== 'id');  // exclude the id column by default
+        .filter(c => c !== 'id');  // exclude the id column by default
     }
     renderTable();
   });
