@@ -1,5 +1,6 @@
 let allRecords = [];
 let exportCols = [];
+let titleCols = [];
 
 // Show or hide an error message
 function showError(msg) {
@@ -44,18 +45,14 @@ function renderTable() {
   });
 }
 
-// Build a filename from the FIRST record in view, concatenating selected columns
+// Build a filename by concatenating the FIRST record’s values in titleCols
 function makeFilename(ext) {
-  if (!exportCols.length || !allRecords.length) {
+  if (!titleCols.length || !allRecords.length) {
     return `export.${ext}`;
   }
   const first = allRecords[0];
-  const parts = exportCols.map(col => {
-    const v = first[col];
-    return v != null ? String(v) : '';
-  }).filter(s => s);  // drop empty strings
+  const parts = titleCols.map(col => first[col] ?? '').filter(v => v !== '');
   const base = parts.join(' ');
-  // sanitize any filesystem-unsafe chars if you like
   return `${base}.${ext}`;
 }
 
@@ -95,45 +92,44 @@ function exportXLSX() {
 function initGrist() {
   grist.ready({
     columns: [
-      {
-        name: "ExportCols",
-        title: "Columns to Export",
-        type: "Any",
-        allowMultiple: true,
+      { 
+        name: "ExportCols", 
+        title: "Columns to Export", 
+        type: "Any", 
+        allowMultiple: true 
+      },
+      { 
+        name: "FileNameCols", 
+        title: "Columns for Filename", 
+        type: "Any", 
+        allowMultiple: true 
       }
     ],
     requiredAccess: 'read table',
     allowSelectBy: true,
   });
 
-  // When user saves column mapping, update exportCols & re-render
+  // When user saves mapping, update exportCols & titleCols, then re-render
   grist.onOptions((options) => {
-    if (options?.ExportCols?.length) {
-      // Filter out the internal id column if user accidentally included it
-      exportCols = options.ExportCols.filter(c => c !== 'id');
-      renderTable();
-    }
+    titleCols  = options.FileNameCols || [];
+    exportCols = (options.ExportCols || [])
+      // remove id & filename cols
+      .filter(c => c !== 'id' && !titleCols.includes(c));
+    renderTable();
   });
 
   // When the view’s records change, convert them to plain objects & re-render
   grist.onRecords((records) => {
-    // Convert Grist Record objects to plain JS objects
-    allRecords = (records || []).map(r => {
-      const obj = {};
-      for (const key of Object.keys(r)) {
-        obj[key] = r[key];
-      }
-      return obj;
-    });
-    // If no explicit mapping yet, default exportCols to all keys of the first record
+    allRecords = (records || []).map(r => ({ ...r }));
+    // default exportCols to all except id & titleCols
     if (!exportCols.length && allRecords.length) {
       exportCols = Object.keys(allRecords[0])
-        .filter(c => c !== 'id');  // exclude the id column by default
+        .filter(c => c !== 'id' && !titleCols.includes(c));
     }
     renderTable();
   });
 
-  // Wire up the export buttons
+  // Wire up export buttons
   document.getElementById('export-csv')
     .addEventListener('click', exportCSV);
   document.getElementById('export-xlsx')
