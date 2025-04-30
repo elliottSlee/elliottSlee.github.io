@@ -2,75 +2,87 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Grist Export Widget</title>
+  <title>Export Widget</title>
+  <!-- 1. Grist plugin API -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-  <!-- SheetJS for Excel export -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <!-- 2. SheetJS for Excel export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.19.2/package/dist/xlsx.full.min.js"></script>
   <style>
-    body {
-      font-family: "Roboto", sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: var(--grist-theme-page-bg, #fafafa);
-      color: var(--grist-theme-text, #333);
-    }
-    .controls {
-      margin-bottom: 16px;
-    }
-    button {
-      margin-right: 8px;
-      padding: 8px 16px;
-      font-size: 14px;
-      background: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #1565c0;
-    }
-    .container {
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #e0e0e0;
-      text-align: left;
-    }
-    th {
-      background: #f5f5f5;
-      font-weight: 500;
-      color: #616161;
-    }
-    tr:hover {
-      background: #eeeeee;
-    }
-    #error {
-      color: red;
-      margin-top: 8px;
-      display: none;
-    }
+    body { font-family: sans-serif; padding: 1em; }
+    button { margin-right: .5em; padding: .5em 1em; }
   </style>
 </head>
 <body>
-  <div class="controls">
-    <button id="export-csv">Export CSV</button>
-    <button id="export-xlsx">Export Excel</button>
-  </div>
-  <div class="container">
-    <table id="data-table">
-      <thead><tr id="table-header"></tr></thead>
-      <tbody id="table-body"></tbody>
-    </table>
-  </div>
-  <div id="error"></div>
-  <script src="script.js"></script>
+
+  <!-- 3. Widget UI -->
+  <button id="btnCsv">Export CSV</button>
+  <button id="btnXlsx">Export Excel</button>
+
+  <script>
+    // 4. Tell Grist we need full document access
+    //    and two multi-column mappings:
+    //    - exportCols → “Columns to export”
+    //    - filenameCols → “Columns for filename”
+    grist.ready({
+      requiredAccess: 'full',
+      columns: [
+        { name: 'exportCols', title: 'Columns to export', allowMultiple: true },
+        { name: 'filenameCols', title: 'Columns for filename', allowMultiple: true }
+      ]
+    });
+
+    // State holders
+    let allRecords = [];
+    let mappings = {};
+
+    // 5. Keep data in sync
+    grist.onRecords((records, map) => {
+      allRecords = records;
+      mappings = map;
+    });
+
+    // 6. Build and download a CSV
+    function doExportCSV() {
+      const cols = (mappings.exportCols || []).filter(c => c !== 'id');
+      if (!cols.length) { return alert('Pick at least one column to export.'); }
+      // Header row
+      const rows = allRecords.map(r => cols.map(c => r[c]));
+      const csv = [cols, ...rows]
+        .map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(','))
+        .join('\r\n');
+      // Filename from first record of each filenameCol
+      const names = mappings.filenameCols || [];
+      const first = allRecords[0] || {};
+      const base = names.map(c => first[c]).join(' ') || 'export';
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${base}.csv`;
+      a.click();
+    }
+
+    // 7. Build and download an Excel file
+    function doExportXLSX() {
+      const cols = (mappings.exportCols || []).filter(c => c !== 'id');
+      if (!cols.length) { return alert('Pick at least one column to export.'); }
+      const data = allRecords.map(r => {
+        const obj = {};
+        cols.forEach(c => obj[c] = r[c]);
+        return obj;
+      });
+      const ws = XLSX.utils.json_to_sheet(data, { header: cols });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+      const names = mappings.filenameCols || [];
+      const first = allRecords[0] || {};
+      const base = names.map(c => first[c]).join(' ') || 'export';
+      XLSX.writeFile(wb, `${base}.xlsx`);
+    }
+
+    // 8. Wire up buttons
+    document.getElementById('btnCsv').addEventListener('click', doExportCSV);
+    document.getElementById('btnXlsx').addEventListener('click', doExportXLSX);
+  </script>
+
 </body>
 </html>
