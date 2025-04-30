@@ -1,6 +1,5 @@
 let allRecords = [];
 let exportCols = [];
-let currentRecord = null;  // Will hold the full selected record
 
 // Show or hide an error message
 function showError(msg) {
@@ -45,24 +44,6 @@ function renderTable() {
   });
 }
 
-// Helper to derive filename prefix from the currentRecord
-function makeFilename(ext) {
-  if (!currentRecord) {
-    return `export.${ext}`;
-  }
-  // Derive YYYY-MM
-  const bp = currentRecord["Billing_Period"];
-  const d = new Date(bp);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const yearMonth = `${year}-${month}`;
-
-  const fullName = currentRecord["Full_Name"] || "Unknown";
-  const contractID = currentRecord["Contract_ID"] || "Unknown";
-
-  return `Timesheet ${yearMonth} ${fullName} ${contractID}.${ext}`;
-}
-
 // Export current view to CSV
 function exportCSV() {
   if (!exportCols.length) {
@@ -79,7 +60,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = makeFilename('csv');
+  a.download = 'export.csv';
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -92,7 +73,7 @@ function exportXLSX() {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(allRecords, { header: exportCols });
   XLSX.utils.book_append_sheet(wb, ws, 'Export');
-  XLSX.writeFile(wb, makeFilename('xlsx'));
+  XLSX.writeFile(wb, 'export.xlsx');
 }
 
 // Initialize the widget
@@ -106,14 +87,14 @@ function initGrist() {
         allowMultiple: true,
       }
     ],
-    requiredAccess: 'full',
+    requiredAccess: 'read table',
     allowSelectBy: true,
   });
 
   // When user saves column mapping, update exportCols & re-render
   grist.onOptions((options) => {
     if (options?.ExportCols?.length) {
-      // Never include the internal 'id' column
+      // Filter out the internal id column if user accidentally included it
       exportCols = options.ExportCols.filter(c => c !== 'id');
       renderTable();
     }
@@ -121,6 +102,7 @@ function initGrist() {
 
   // When the view’s records change, convert them to plain objects & re-render
   grist.onRecords((records) => {
+    // Convert Grist Record objects to plain JS objects
     allRecords = (records || []).map(r => {
       const obj = {};
       for (const key of Object.keys(r)) {
@@ -128,21 +110,12 @@ function initGrist() {
       }
       return obj;
     });
-    // Default to all columns (minus 'id') if none explicitly mapped
+    // If no explicit mapping yet, default exportCols to all keys of the first record
     if (!exportCols.length && allRecords.length) {
-      exportCols = Object.keys(allRecords[0]).filter(c => c !== 'id');
+      exportCols = Object.keys(allRecords[0])
+      filter(c => c !== 'id');  // exclude the id column by default
     }
     renderTable();
-  });
-
-  // When the cursor (selected row) changes, fetch full record for naming
-  grist.onRecord(async (record) => {
-    if (!record) {
-      currentRecord = null;
-    } else {
-      // Fetch full record including all columns
-      currentRecord = await grist.docApi.fetchSelectedRecord(record.id);
-    }
   });
 
   // Wire up the export buttons
