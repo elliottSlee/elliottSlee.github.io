@@ -51,16 +51,16 @@ function makeFilename(ext) {
     return `export.${ext}`;
   }
   // Derive YYYY-MM
-  const bp = currentRecord["Billing_Period.Billing_Period"];
+  const bp = currentRecord["Billing_Period"];
   const d = new Date(bp);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const yearMonth = `${year}-${month}`;
 
   const fullName = currentRecord["Full_Name"] || "Unknown";
-  const contractID = currentRecord["Contract_ID.Contract_ID"] || "Unknown";
+  const contractID = currentRecord["Contract_ID"] || "Unknown";
 
-  return `Timesheet ${yearMonth} ${fullName} ${contractID}`;
+  return `Timesheet ${yearMonth} ${fullName} ${contractID}.${ext}`;
 }
 
 // Export current view to CSV
