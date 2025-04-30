@@ -102,9 +102,6 @@ function initGrist() {
     requiredAccess: 'full',
     allowSelectBy: true,
   });
-  
-  onEditOptions: () => {
-  }
 
   // Capture the column mappings (and filter out 'id')
   grist.onOptions((options, mappings) => {
