@@ -60,7 +60,7 @@ function makeFilename(ext) {
   const fullName = currentRecord["Full_Name"] || "Unknown";
   const contractID = currentRecord["Contract_ID.Contract_ID"] || "Unknown";
 
-  return `Timesheet ${yearMonth} ${fullName} ${contractID}.${ext}`;
+  return `Timesheet ${yearMonth} ${fullName} ${contractID}`;
 }
 
 // Export current view to CSV
