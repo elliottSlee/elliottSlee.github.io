@@ -64,15 +64,39 @@ function onRecord(row, mappings) {
   }
 }
 
-ready(function() {
-  // Update the widget anytime the document data changes.
-  grist.ready({columns: [{name: column, title: "Action"}]});
-  grist.onRecord(onRecord);
+// Returns a promise that resolves to true if `promise` takes longer than ms to settle.
+function isLongerThan(promise, ms) {
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; }, ms);
+  return promise
+    .finally(() => clearTimeout(timer))
+    .then(() => timedOut, () => timedOut);
+}
 
-  Vue.config.errorHandler = handleError;
+ready(function() {
+  // … existing grist.ready, onRecord, etc …
+
+  // Wrap applyUserActions to track “slow” state
+  const origApply = grist.docApi.applyUserActions.bind(grist.docApi);
+  data.processing = false;
+  grist.docApi.applyUserActions = async function(actions) {
+    // Kick off both the real apply and a timeout check
+    const p = origApply(actions);
+    isLongerThan(p, 1000).then((slow) => {
+      data.processing = slow;
+    });
+    try {
+      const result = await p;
+      return result;
+    } finally {
+      data.processing = false;
+    }
+  };
+
+  // Initialize Vue with the new `processing` field
   app = new Vue({
     el: '#app',
     data: data,
-    methods: {applyActions}
+    methods: {applyActions},
   });
 });

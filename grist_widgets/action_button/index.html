@@ -23,7 +23,14 @@
       </div>
       <template v-else>
         <div class="container">
-          <button class="button" v-for="(input, idx) in inputs" v-on:click="applyActions(input.actions)" v-on:mouseover="desc = idx" v-on:mouseleave="desc = null">
+          <button
+            class="button"
+            v-for="(input, idx) in inputs"
+            @click="applyActions(input.actions)"
+            :disabled="processing"
+            @mouseover="desc = idx"
+            @mouseleave="desc = null"
+            >
             {{ input.button }}
           </button>
         </div>
