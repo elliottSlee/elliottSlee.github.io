@@ -64,18 +64,11 @@ function onRecord(row, mappings) {
   }
 }
 
-// Returns a promise that resolves to true if `promise` takes longer than ms to settle.
-function isLongerThan(promise, ms) {
-  let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; }, ms);
-  return promise
-    .finally(() => clearTimeout(timer))
-    .then(() => timedOut, () => timedOut);
-}
-
 ready(function() {
-  // … existing grist.ready, onRecord, etc …
-
+  // Update the widget anytime the document data changes.
+  grist.ready({columns: [{name: column, title: "Action"}]});
+  grist.onRecord(onRecord);
+  
   // Wrap applyUserActions to track “slow” state
   const origApply = grist.docApi.applyUserActions.bind(grist.docApi);
   data.processing = false;
