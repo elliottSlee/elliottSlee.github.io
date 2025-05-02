@@ -24,15 +24,14 @@
       <template v-else>
         <div class="container">
           <button
-            class="button"
-            v-for="(input, idx) in inputs"
-            @click="applyActions(input.actions)"
-            :disabled="processing"
-            @mouseover="desc = idx"
-            @mouseleave="desc = null"
-            >
-            {{ input.button }}
-          </button>
+          v-for="(input, idx) in inputs"
+          :disabled="processing"
+          @click="applyActions(input.actions)"
+          @mouseover="desc = idx"
+          @mouseleave="desc = null"
+        >
+          {{ input.button }}  <!-- record-based text stays untouched -->
+        </button>
         </div>
         <div class="description" v-for="(input, idx) in inputs" v-if="desc === idx">{{ input.description }}</div>
         <div class="result" v-if="result">{{ input.result }}</div>

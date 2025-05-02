@@ -48,7 +48,13 @@ body {
   font-weight: inherit;
 }
 
-.button[disabled] {
-  opacity: 0.5;
+/* actionbutton.css */
+button[disabled] {
+  opacity: 0.6;
   cursor: not-allowed;
+}
+/* optional: prepend an hourglass without touching the record text */
+button[disabled]::before {
+  content: '⏳ ';
+  margin-right: 0.3em;
 }

@@ -69,27 +69,37 @@ ready(function() {
   grist.ready({columns: [{name: column, title: "Action"}]});
   grist.onRecord(onRecord);
   
-  // Wrap applyUserActions to track “slow” state
-  const origApply = grist.docApi.applyUserActions.bind(grist.docApi);
-  data.processing = false;
-  grist.docApi.applyUserActions = async function(actions) {
-    // Kick off both the real apply and a timeout check
-    const p = origApply(actions);
-    isLongerThan(p, 1000).then((slow) => {
-      data.processing = slow;
-    });
-    try {
-      const result = await p;
-      return result;
-    } finally {
-      data.processing = false;
-    }
-  };
-
-  // Initialize Vue with the new `processing` field
   app = new Vue({
     el: '#app',
-    data: data,
-    methods: {applyActions},
+    data: {
+      inputs: [],        // your inputs array
+      desc: null,
+      processing: false, // ← declare it here
+    },
+    methods: {
+      async applyActions(actions) {
+        // reset
+        this.processing = false;
+
+        // kick off the real apply
+        const applyPromise = grist.docApi.applyUserActions(actions);
+
+        // race it against a 1 s timer
+        const isSlow = await Promise.race([
+          applyPromise.then(() => false).catch(() => false),
+          new Promise(resolve => setTimeout(() => resolve(true), 1000)),
+        ]);
+
+        if (isSlow) {
+          this.processing = true;
+        }
+
+        try {
+          await applyPromise;
+        } finally {
+          this.processing = false;
+        }
+      }
+    }
   });
 });
